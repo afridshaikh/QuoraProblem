@@ -1,5 +1,4 @@
-''' importing required classes '''
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity,cosine_distances
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -11,13 +10,23 @@ warnings.filterwarnings('ignore')
 import re
 
 
+data = pd.read_csv('test.csv')
+
+for i in data[ data['question1'].isnull() == True ].index:
+    data.set_value(value=data.iloc[i][2], index=i, col='question1')
+    
+for i in data[ data['question2'].isnull() == True ].index:
+    data.set_value(value=data.iloc[i][1], index=i, col='question2')
+
+
 
 tv = TfidfVectorizer(stop_words=None)
+cv = CountVectorizer(stop_words=None)
 stop_words = set(stopwords.words('english'))
 lemmatizer = WordNetLemmatizer()
 
 
-''' remove punctuations '''
+
 def clean_punct(text):
     text = str(text)
     text = text.lower()
@@ -55,7 +64,6 @@ def clean_punct(text):
     return text
 
 
-''' clean sentence '''
 def clean(sent):
     lemmo = []
     sent = clean_punct(sent)
@@ -63,9 +71,9 @@ def clean(sent):
         if word not in stop_words:
             lemmo.append(lemmatizer.lemmatize(word))
     return " ".join(lemmo)
+    
 
 
-''' finding similarity'''
 def similarity(sent1, sent2):
     clean_sent1 = clean(sent1)
     clean_sent2 = clean(sent2)
@@ -73,23 +81,21 @@ def similarity(sent1, sent2):
     return cosine_similarity(val[0], val[1])
 
 
-''' Initialize output file '''
+
 op = pd.DataFrame(columns=["test_id", "probability"])
 
-
-count = 1
-while True:
-    sent1 = input("Enter question1 \n")
-    sent2 = input("Enter question2 \n")
+for i in range(len(data)):
+    sent1 = data.iloc[i][1]
+    sent2 = data.iloc[i][2]
     try:
         score = similarity(sent1, sent2)
     except ValueError:
         score = [[0]]
-    op = op.set_value(value=[count, score[0][0]], index=len(op), col=["test_id", "probability"])
-    
-    #write results to file
-    op.to_csv("results.csv", index=None)
-    count+=1
+    op = op.set_value(value=[data.iloc[i][0], score[0][0]], index=len(op), col=["test_id", "probability"])
+    print(i, end='\t')
+
+
+op.to_csv("results.csv", index=None)
 
 
 
