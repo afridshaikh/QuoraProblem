@@ -5,7 +5,6 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
 import string
-import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
 import re
@@ -78,5 +77,5 @@ while True:
     sent1 = input("Enter question1 \n")
     sent2 = input("Enter question2 \n")
     score = similarity(sent1, sent2)
-    print("Probability of questions having same intend is "+ str(score[[0]]))
+    print("Probability of questions having same intend is "+ str(score[0][0]))
     
