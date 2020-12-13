@@ -55,6 +55,7 @@ def clean_punct(text):
     return text
 
 
+	    
 ''' clean sentence '''
 def clean(sent):
     lemmo = []
@@ -70,27 +71,12 @@ def similarity(sent1, sent2):
     clean_sent1 = clean(sent1)
     clean_sent2 = clean(sent2)
     val = tv.fit_transform([clean_sent1,clean_sent2]).toarray()
-    return cosine_similarity(val[0], val[1])
+    return cosine_similarity(val[0].reshape(1, -1), val[1].reshape(1, -1))
 
 
-''' Initialize output file '''
-op = pd.DataFrame(columns=["test_id", "probability"])
-
-
-count = 1
 while True:
     sent1 = input("Enter question1 \n")
     sent2 = input("Enter question2 \n")
-    try:
-        score = similarity(sent1, sent2)
-    except ValueError:
-        score = [[0]]
-    op = op.set_value(value=[count, score[0][0]], index=len(op), col=["test_id", "probability"])
+    score = similarity(sent1, sent2)
+    print("Probability of questions having same intend is "+ str(score[[0]]))
     
-    #write results to file
-    op.to_csv("results.csv", index=None)
-    count+=1
-
-
-
-
